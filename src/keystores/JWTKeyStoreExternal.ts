@@ -15,7 +15,7 @@ export class JWTKeyHandlerExternal implements JWTKeyStore {
         this._issuer = issuer;
         this._audience = audience;
 
-        console.log('Using external keystore', {jwksUri, issuer, audience});
+        console.log('Using external keystore with issuer "%s" and audience "%s"\n\t JWKS: %s', issuer, audience, jwksUri);
 
         this.jwksClient = new JwksClient({
             jwksUri: jwksUri,
@@ -42,6 +42,10 @@ export class JWTKeyHandlerExternal implements JWTKeyStore {
 
     get issuer(): string {
         return this._issuer;
+    }
+
+    canSign(): boolean {
+        return false;
     }
 
     async getKeyPair(): Promise<JWTKeyPair> {

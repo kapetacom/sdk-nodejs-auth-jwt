@@ -40,7 +40,7 @@ export class JWTKeyStoreInternal implements JWTKeyStore {
         this._issuer = issuer;
         this._audience = audience;
 
-        console.log('Using internal keystore with issuer %s and audience %s', issuer, audience);
+        console.log('Using internal keystore with issuer "%s" and audience "%s"', issuer, audience);
     }
 
     get audience(): string | string[] {
@@ -49,6 +49,10 @@ export class JWTKeyStoreInternal implements JWTKeyStore {
 
     get issuer(): string {
         return this._issuer;
+    }
+
+    canSign(): boolean {
+        return true;
     }
 
     async getPublicKey(kid: string): Promise<KeyWithAlgorithm> {

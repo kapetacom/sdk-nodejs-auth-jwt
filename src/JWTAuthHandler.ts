@@ -4,12 +4,16 @@
  */
 import jwt, {DecodeOptions, Jwt, JwtPayload, SignOptions, VerifyOptions} from 'jsonwebtoken';
 import {JWTKeyStore} from "./keystores";
+import {AsyncLocalStorage} from "async_hooks";
+
 
 export class JWTAuthHandler {
-    public readonly keyStore:JWTKeyStore;
+    public readonly keyStores:JWTKeyStore[];
 
-    constructor(keyStore:JWTKeyStore) {
-        this.keyStore = keyStore;
+
+
+    constructor(...keyStores:JWTKeyStore[]) {
+        this.keyStores = keyStores;
     }
 
     private decodeToken(token: string, options?: DecodeOptions):Jwt | null {
@@ -19,7 +23,7 @@ export class JWTAuthHandler {
         });
     }
 
-    async verifyToken(token: string, options?: VerifyOptions):Promise<Jwt> {
+    public async verifyToken(token: string, options?: VerifyOptions):Promise<Jwt> {
         return new Promise(async (resolve, reject) => {
 
             const jwtToken = this.decodeToken(token);
@@ -40,16 +44,20 @@ export class JWTAuthHandler {
                 return;
             }
 
-            if (jwtToken.payload.iss !== this.keyStore.issuer) {
+            const issuer = jwtToken.payload.iss;
+
+            const keyStore = this.keyStores.find((keyStore) => keyStore.issuer === issuer);
+
+            if (!keyStore) {
                 reject(new Error('Invalid token: Invalid issuer'));
                 return;
             }
 
-            const publicKey = await this.keyStore.getPublicKey(jwtToken.header.kid);
+            const publicKey = await keyStore.getPublicKey(jwtToken.header.kid);
 
             jwt.verify(token, publicKey.value, {
-                issuer: this.keyStore.issuer,
-                audience: this.keyStore.audience,
+                issuer: keyStore.issuer,
+                audience: keyStore.audience,
                 algorithms: [publicKey.alg],
                 ...options,
                 complete: true,
@@ -67,24 +75,48 @@ export class JWTAuthHandler {
         })
     }
 
-    async createToken(payload: Omit<JwtPayload,'iss'|'aud'>, options?: SignOptions):Promise<string> {
+    public async createToken(payload: Omit<JwtPayload,'iss'|'aud'|'iat'> & {sub:string}, options?: SignOptions):Promise<string> {
         return new Promise(async (resolve, reject) => {
+            const keyStore = this.keyStores.find(keyStore => {
+                if (!keyStore.canSign()) {
+                    return false;
+                }
+                if (!options?.issuer) {
+                    return true;
+                }
+                return keyStore.issuer === options?.issuer;
+            });
 
-            const keyPair = await this.keyStore.getKeyPair();
-            jwt.sign(payload, keyPair.privateKey, {
-                issuer: this.keyStore.issuer,
-                audience: this.keyStore.audience,
+            if (!keyStore) {
+                reject(new Error('Missing key store or invalid issuer'));
+                return;
+            }
+
+            const keyPair = await keyStore.getKeyPair();
+            const signOptions = {
+                issuer: keyStore.issuer,
+                audience: keyStore.audience,
                 algorithm: keyPair.alg,
                 keyid: keyPair.kid,
-                subject: payload.sub,
-                jwtid: payload.jti,
-                expiresIn: payload.exp,
                 encoding: 'utf8',
-                notBefore: payload.nbf,
                 allowInsecureKeySizes: false,
                 allowInvalidAsymmetricKeyTypes: false,
                 ...options,
-            }, (err, token) => {
+            };
+
+            if (payload.jti) {
+                delete signOptions.jwtid;
+            }
+
+            if (payload.nbf) {
+                delete signOptions.notBefore;
+            }
+
+            if (payload.exp) {
+                delete signOptions.expiresIn;
+            }
+
+            jwt.sign(payload, keyPair.privateKey, signOptions, (err, token) => {
                 if (err) {
                     reject(err);
                     return;

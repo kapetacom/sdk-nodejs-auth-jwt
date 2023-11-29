@@ -21,6 +21,7 @@ export interface KeyWithAlgorithm {
 export interface JWTKeyStore {
     getPublicKey(kid: string): Promise<KeyWithAlgorithm>;
     getKeyPair(): Promise<JWTKeyPair>;
+    canSign(): boolean;
     get issuer(): string;
     get audience(): string|string[];
     toJWKS(): JWKS;
