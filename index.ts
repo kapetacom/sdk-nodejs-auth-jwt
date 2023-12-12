@@ -7,6 +7,6 @@ export * from './src/JWTAuthHandler';
 export * from './src/middleware/jwks-routes';
 export * from './src/middleware/jwt-authorization';
 export * from './src/keystores';
-export * from './src/JWTAuthConsumer';
-export * from './src/JWTAuthProvider';
+export * from './src/internal-keystore';
+export * from './src/external-keystore';
 export * from './src/types';
