@@ -80,15 +80,13 @@
         "node-jose": "^2.2.0"
     },
     "peerDependencies": {
-        "@kapeta/sdk-config": "<2",
-        "@kapeta/sdk-server": "<2",
+        "@kapeta/sdk-config": "^2",
         "express": "^4"
     },
     "devDependencies": {
         "@kapeta/eslint-config": "^0.6.0",
         "@kapeta/prettier-config": "^0.6.0",
-        "@kapeta/sdk-config": "<2",
-        "@kapeta/sdk-server": "<2",
+        "@kapeta/sdk-config": "^2",
         "@types/express": "^4.17.21",
         "@types/fs-extra": "^11.0.4",
         "@types/jsonwebtoken": "^9.0.5",

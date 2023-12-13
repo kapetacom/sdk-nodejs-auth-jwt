@@ -4,8 +4,6 @@
  */
 import jwt, {DecodeOptions, Jwt, JwtPayload, SignOptions, VerifyOptions} from 'jsonwebtoken';
 import {JWTKeyStore} from "./keystores";
-import {AsyncLocalStorage} from "async_hooks";
-
 
 export class JWTAuthHandler {
     public readonly keyStores:JWTKeyStore[];
