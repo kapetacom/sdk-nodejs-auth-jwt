@@ -2,12 +2,11 @@
  * Copyright 2023 Kapeta Inc.
  * SPDX-License-Identifier: MIT
  */
-import {Router} from 'express';
-import {KapetaAuthenticationMetadata, PATH_KAPETA_AUTHENTICATION, PATH_WELL_KNOWN_JWKS} from "../types";
-import {JWTKeyStore} from "../keystores";
+import { Router } from 'express';
+import { KapetaAuthenticationMetadata, PATH_KAPETA_AUTHENTICATION, PATH_WELL_KNOWN_JWKS } from '../types';
+import { JWTKeyStore } from '../keystores';
 
-
-export const jwksRoutes = (keyStore: JWTKeyStore):Router => {
+export const jwksRoutes = (keyStore: JWTKeyStore): Router => {
     const router = Router();
 
     console.log('Publishing JWKS on %s', PATH_WELL_KNOWN_JWKS);
@@ -22,9 +21,9 @@ export const jwksRoutes = (keyStore: JWTKeyStore):Router => {
             jwks: PATH_WELL_KNOWN_JWKS,
             issuer: keyStore.issuer,
             audience: keyStore.audience,
-        }
-        res.json(metadata)
+        };
+        res.json(metadata);
     });
 
     return router;
-}
+};

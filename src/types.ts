@@ -1,12 +1,12 @@
-import { Jwt } from "jsonwebtoken";
-import {JWTAuthHandler} from "./JWTAuthHandler";
+import { Jwt } from 'jsonwebtoken';
+import { JWTAuthHandler } from './JWTAuthHandler';
 
 declare global {
     export namespace Express {
         export interface Request {
             auth?: Jwt;
             authHandler?: JWTAuthHandler;
-            isAuthenticated:() => boolean;
+            isAuthenticated: () => boolean;
         }
     }
 }
@@ -14,7 +14,7 @@ declare global {
 export const PORT_TYPE = 'http';
 export const PATH_KAPETA_AUTHENTICATION = '/.kapeta/authentication.json';
 export const PATH_WELL_KNOWN_JWKS = '/.well-known/jwks.json';
-export type {Jwt, JwtPayload, JwtHeader, Algorithm} from 'jsonwebtoken';
+export type { Jwt, JwtPayload, JwtHeader, Algorithm } from 'jsonwebtoken';
 
 export class AuthError extends Error {
     public readonly statusCode: number;
@@ -26,9 +26,8 @@ export class AuthError extends Error {
 }
 
 export interface KapetaAuthenticationMetadata {
-    type: 'jwt',
-    jwks: string,
-    issuer: string,
-    audience: string|string[],
+    type: 'jwt';
+    jwks: string;
+    issuer: string;
+    audience: string | string[];
 }
-

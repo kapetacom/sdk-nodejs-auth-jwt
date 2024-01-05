@@ -2,28 +2,25 @@
  * Copyright 2023 Kapeta Inc.
  * SPDX-License-Identifier: MIT
  */
-import jwt, {DecodeOptions, Jwt, JwtPayload, SignOptions, VerifyOptions} from 'jsonwebtoken';
-import {JWTKeyStore} from "./keystores";
+import jwt, { DecodeOptions, Jwt, JwtPayload, SignOptions, VerifyOptions } from 'jsonwebtoken';
+import { JWTKeyStore } from './keystores';
 
 export class JWTAuthHandler {
-    public readonly keyStores:JWTKeyStore[];
+    public readonly keyStores: JWTKeyStore[];
 
-
-
-    constructor(...keyStores:JWTKeyStore[]) {
+    constructor(...keyStores: JWTKeyStore[]) {
         this.keyStores = keyStores;
     }
 
-    private decodeToken(token: string, options?: DecodeOptions):Jwt | null {
+    private decodeToken(token: string, options?: DecodeOptions): Jwt | null {
         return jwt.decode(token, {
             ...options,
             complete: true,
         });
     }
 
-    public async verifyToken(token: string, options?: VerifyOptions):Promise<Jwt> {
+    public async verifyToken(token: string, options?: VerifyOptions): Promise<Jwt> {
         return new Promise(async (resolve, reject) => {
-
             const jwtToken = this.decodeToken(token);
 
             if (!jwtToken) {
@@ -35,7 +32,6 @@ export class JWTAuthHandler {
                 reject(new Error('Invalid token: Missing kid claim'));
                 return;
             }
-
 
             if (typeof jwtToken.payload === 'string') {
                 reject(new Error('Invalid token: Invalid payload'));
@@ -53,29 +49,37 @@ export class JWTAuthHandler {
 
             const publicKey = await keyStore.getPublicKey(jwtToken.header.kid);
 
-            jwt.verify(token, publicKey.value, {
-                issuer: keyStore.issuer,
-                audience: keyStore.audience,
-                algorithms: [publicKey.alg],
-                ...options,
-                complete: true,
-            }, (err, decoded) => {
-                if (err) {
-                    reject(err);
-                    return;
+            jwt.verify(
+                token,
+                publicKey.value,
+                {
+                    issuer: keyStore.issuer,
+                    audience: keyStore.audience,
+                    algorithms: [publicKey.alg],
+                    ...options,
+                    complete: true,
+                },
+                (err, decoded) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    if (!decoded) {
+                        reject(new Error('Invalid token'));
+                        return;
+                    }
+                    resolve(decoded);
                 }
-                if (!decoded) {
-                    reject(new Error('Invalid token'));
-                    return;
-                }
-                resolve(decoded);
-            });
-        })
+            );
+        });
     }
 
-    public async createToken(payload: Omit<JwtPayload,'iss'|'aud'|'iat'> & {sub:string}, options?: SignOptions):Promise<string> {
+    public async createToken(
+        payload: Omit<JwtPayload, 'iss' | 'aud' | 'iat'> & { sub: string },
+        options?: SignOptions
+    ): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const keyStore = this.keyStores.find(keyStore => {
+            const keyStore = this.keyStores.find((keyStore) => {
                 if (!keyStore.canSign()) {
                     return false;
                 }
