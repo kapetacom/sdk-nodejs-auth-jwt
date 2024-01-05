@@ -2,7 +2,7 @@
  * Copyright 2023 Kapeta Inc.
  * SPDX-License-Identifier: MIT
  */
-import {Algorithm} from "jsonwebtoken";
+import { Algorithm } from 'jsonwebtoken';
 
 export interface JWTKeyPair {
     kid: string;
@@ -23,7 +23,7 @@ export interface JWTKeyStore {
     getKeyPair(): Promise<JWTKeyPair>;
     canSign(): boolean;
     get issuer(): string;
-    get audience(): string|string[];
+    get audience(): string | string[];
     toJWKS(): JWKS;
 }
 
@@ -40,5 +40,5 @@ export interface JWK {
 }
 
 export interface JWKS {
-    keys: JWK[]
+    keys: JWK[];
 }

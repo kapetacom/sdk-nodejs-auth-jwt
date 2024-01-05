@@ -2,12 +2,12 @@
  * Copyright 2023 Kapeta Inc.
  * SPDX-License-Identifier: MIT
  */
-import {JWK} from "node-jose";
-import {Algorithm} from "jsonwebtoken";
-import FSExtra from "fs-extra";
-import {JWKS, JWTKeyPair, JWTKeyStore, KeyWithAlgorithm} from "./types";
+import { JWK } from 'node-jose';
+import { Algorithm } from 'jsonwebtoken';
+import FSExtra from 'fs-extra';
+import { JWKS, JWTKeyPair, JWTKeyStore, KeyWithAlgorithm } from './types';
 
-export async function ensureFileKeystore(filename:string) {
+export async function ensureFileKeystore(filename: string) {
     try {
         const fileStat = await FSExtra.stat(filename);
         if (fileStat.isFile()) {
@@ -20,22 +20,21 @@ export async function ensureFileKeystore(filename:string) {
 
     const keyStore = await createInMemoryKeystore();
     await FSExtra.writeFile(filename, JSON.stringify(keyStore.toJSON(true)));
-    return keyStore
+    return keyStore;
 }
 
 export async function createInMemoryKeystore() {
     const keyStore = JWK.createKeyStore();
-    await keyStore.generate('RSA', 2048, {alg: 'RS256', use: 'sig' });
+    await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' });
     return keyStore;
 }
 
-
 export class JWTKeyStoreInternal implements JWTKeyStore {
-    private readonly _issuer:string;
-    private readonly _audience:string|string[];
-    private readonly keyStore:JWK.KeyStore;
+    private readonly _issuer: string;
+    private readonly _audience: string | string[];
+    private readonly keyStore: JWK.KeyStore;
 
-    constructor(keyStore: JWK.KeyStore, issuer:string, audience:string|string[]) {
+    constructor(keyStore: JWK.KeyStore, issuer: string, audience: string | string[]) {
         this.keyStore = keyStore;
         this._issuer = issuer;
         this._audience = audience;
@@ -56,7 +55,7 @@ export class JWTKeyStoreInternal implements JWTKeyStore {
     }
 
     async getPublicKey(kid: string): Promise<KeyWithAlgorithm> {
-        const key = this.keyStore.get({kid});
+        const key = this.keyStore.get({ kid });
         if (!key) {
             throw new Error('Key not found: ' + kid);
         }
@@ -67,8 +66,8 @@ export class JWTKeyStoreInternal implements JWTKeyStore {
         };
     }
 
-    async getKeyPair():Promise<JWTKeyPair> {
-        const keys = this.keyStore.all({use: 'sig'});
+    async getKeyPair(): Promise<JWTKeyPair> {
+        const keys = this.keyStore.all({ use: 'sig' });
         if (!keys || keys.length === 0) {
             throw new Error('Not keys found');
         }
@@ -81,7 +80,7 @@ export class JWTKeyStoreInternal implements JWTKeyStore {
             use: key.use,
             privateKey: key.toPEM(true),
             publicKey: key.toPEM(false),
-        }
+        };
     }
 
     public toJWKS(): JWKS {

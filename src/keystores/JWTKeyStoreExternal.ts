@@ -2,20 +2,25 @@
  * Copyright 2023 Kapeta Inc.
  * SPDX-License-Identifier: MIT
  */
-import {JwksClient} from "jwks-rsa";
-import {Algorithm} from "jsonwebtoken";
-import {JWKS, JWTKeyPair, JWTKeyStore, KeyWithAlgorithm} from "./types";
+import { JwksClient } from 'jwks-rsa';
+import { Algorithm } from 'jsonwebtoken';
+import { JWKS, JWTKeyPair, JWTKeyStore, KeyWithAlgorithm } from './types';
 
 export class JWTKeyHandlerExternal implements JWTKeyStore {
     private readonly jwksClient: JwksClient;
-    private readonly _issuer:string;
-    private readonly _audience:string|string[];
+    private readonly _issuer: string;
+    private readonly _audience: string | string[];
 
-    constructor(jwksUri:string, issuer:string, audience:string|string[]) {
+    constructor(jwksUri: string, issuer: string, audience: string | string[]) {
         this._issuer = issuer;
         this._audience = audience;
 
-        console.log('Using external keystore with issuer "%s" and audience "%s"\n\t JWKS: %s', issuer, audience, jwksUri);
+        console.log(
+            'Using external keystore with issuer "%s" and audience "%s"\n\t JWKS: %s',
+            issuer,
+            audience,
+            jwksUri
+        );
 
         this.jwksClient = new JwksClient({
             jwksUri: jwksUri,
@@ -37,7 +42,7 @@ export class JWTKeyHandlerExternal implements JWTKeyStore {
         return {
             alg: key.alg as Algorithm,
             value: key.getPublicKey(),
-        }
+        };
     }
 
     get issuer(): string {
@@ -49,10 +54,10 @@ export class JWTKeyHandlerExternal implements JWTKeyStore {
     }
 
     async getKeyPair(): Promise<JWTKeyPair> {
-        throw new Error('External key handler does not have access to private key')
+        throw new Error('External key handler does not have access to private key');
     }
 
     public toJWKS(): JWKS {
-        throw new Error('External key handler does not have access to private key')
+        throw new Error('External key handler does not have access to private key');
     }
 }
