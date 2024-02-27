@@ -9,6 +9,22 @@ export async function createExternalKeyStore(resourceName: string, provider: Con
         baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
 
+    const metadata = await fetchMetadataWithRetry(baseUrl!);
+
+    return new JWTKeyHandlerExternal(baseUrl + metadata.jwks, metadata.issuer, metadata.audience);
+}
+
+async function fetchMetadataWithRetry(baseUrl: string): Promise<KapetaAuthenticationMetadata> {
+    while (true) {
+        try {
+            return await fetchMetadata(baseUrl);
+        } catch (e) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+}
+
+async function fetchMetadata(baseUrl: string): Promise<KapetaAuthenticationMetadata> {
     const response = await fetch(baseUrl + PATH_KAPETA_AUTHENTICATION, {
         headers: {
             Accept: 'application/json',
@@ -24,7 +40,5 @@ export async function createExternalKeyStore(resourceName: string, provider: Con
         throw new Error('Invalid response from Kapeta authentication service: ' + response.status);
     }
 
-    const metadata = (await response.json()) as KapetaAuthenticationMetadata;
-
-    return new JWTKeyHandlerExternal(baseUrl + metadata.jwks, metadata.issuer, metadata.audience);
+    return (await response.json()) as KapetaAuthenticationMetadata
 }
