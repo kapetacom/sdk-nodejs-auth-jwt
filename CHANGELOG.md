@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.1.0...v2.1.1) (2024-02-27)
+
+
+### Bug Fixes
+
+* add logging ([04b2136](https://github.com/kapetacom/sdk-nodejs-auth-jwt/commit/04b2136f3fa63fc06d539ca3323645c435ed4677))
+* add wait for jwt provider to be ready instead of crashing ([36c175d](https://github.com/kapetacom/sdk-nodejs-auth-jwt/commit/36c175d6648ea134ff1be7e96b8a0b522dac33d3))
+
 # [2.1.0](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.0.0...v2.1.0) (2024-01-05)
 
 
