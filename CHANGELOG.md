@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.1.1...v2.1.2) (2024-03-13)
+
+
+### Bug Fixes
+
+* Only add algorithm if available ([#4](https://github.com/kapetacom/sdk-nodejs-auth-jwt/issues/4)) ([366c099](https://github.com/kapetacom/sdk-nodejs-auth-jwt/commit/366c09955e69d1b3547518692eada2bfae18ed12))
+
 ## [2.1.1](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.1.0...v2.1.1) (2024-02-27)
 
 
