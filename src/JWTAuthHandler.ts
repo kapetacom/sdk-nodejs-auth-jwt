@@ -55,7 +55,7 @@ export class JWTAuthHandler {
                 {
                     issuer: keyStore.issuer,
                     audience: keyStore.audience,
-                    algorithms: [publicKey.alg],
+                    algorithms: publicKey.alg ? [publicKey.alg] : undefined,
                     ...options,
                     complete: true,
                 },
