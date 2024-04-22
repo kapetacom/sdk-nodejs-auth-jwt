@@ -20,35 +20,31 @@ export class JWTAuthHandler {
     }
 
     public async verifyToken(token: string, options?: VerifyOptions): Promise<Jwt> {
-        return new Promise(async (resolve, reject) => {
-            const jwtToken = this.decodeToken(token);
+        const jwtToken = this.decodeToken(token);
 
-            if (!jwtToken) {
-                reject(new Error('Invalid token'));
-                return;
-            }
+        if (!jwtToken) {
+            throw new Error('Invalid token');
+        }
 
-            if (!jwtToken.header.kid) {
-                reject(new Error('Invalid token: Missing kid claim'));
-                return;
-            }
+        if (!jwtToken.header.kid) {
+            throw new Error('Invalid token: Missing kid claim');
+        }
 
-            if (typeof jwtToken.payload === 'string') {
-                reject(new Error('Invalid token: Invalid payload'));
-                return;
-            }
+        if (typeof jwtToken.payload === 'string') {
+            throw new Error('Invalid token: Invalid payload');
+        }
 
-            const issuer = jwtToken.payload.iss;
+        const issuer = jwtToken.payload.iss;
 
-            const keyStore = this.keyStores.find((keyStore) => keyStore.issuer === issuer);
+        const keyStore = this.keyStores.find((keyStore) => keyStore.issuer === issuer);
 
-            if (!keyStore) {
-                reject(new Error('Invalid token: Invalid issuer'));
-                return;
-            }
+        if (!keyStore) {
+            throw new Error('Invalid token: Invalid issuer');
+        }
 
-            const publicKey = await keyStore.getPublicKey(jwtToken.header.kid);
+        const publicKey = await keyStore.getPublicKey(jwtToken.header.kid);
 
+        return new Promise((resolve, reject) =>
             jwt.verify(
                 token,
                 publicKey.value,
@@ -70,54 +66,53 @@ export class JWTAuthHandler {
                     }
                     resolve(decoded);
                 }
-            );
-        });
+            )
+        );
     }
 
     public async createToken(
         payload: Omit<JwtPayload, 'iss' | 'aud' | 'iat'> & { sub: string },
         options?: SignOptions
     ): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            const keyStore = this.keyStores.find((keyStore) => {
-                if (!keyStore.canSign()) {
-                    return false;
-                }
-                if (!options?.issuer) {
-                    return true;
-                }
-                return keyStore.issuer === options?.issuer;
-            });
-
-            if (!keyStore) {
-                reject(new Error('Missing key store or invalid issuer'));
-                return;
+        const keyStore = this.keyStores.find((keyStore) => {
+            if (!keyStore.canSign()) {
+                return false;
             }
-
-            const keyPair = await keyStore.getKeyPair();
-            const signOptions = {
-                issuer: keyStore.issuer,
-                audience: keyStore.audience,
-                algorithm: keyPair.alg,
-                keyid: keyPair.kid,
-                encoding: 'utf8',
-                allowInsecureKeySizes: false,
-                allowInvalidAsymmetricKeyTypes: false,
-                ...options,
-            };
-
-            if (payload.jti) {
-                delete signOptions.jwtid;
+            if (!options?.issuer) {
+                return true;
             }
+            return keyStore.issuer === options?.issuer;
+        });
 
-            if (payload.nbf) {
-                delete signOptions.notBefore;
-            }
+        if (!keyStore) {
+            throw new Error('Missing key store or invalid issuer');
+        }
 
-            if (payload.exp) {
-                delete signOptions.expiresIn;
-            }
+        const keyPair = await keyStore.getKeyPair();
+        const signOptions = {
+            issuer: keyStore.issuer,
+            audience: keyStore.audience,
+            algorithm: keyPair.alg,
+            keyid: keyPair.kid,
+            encoding: 'utf8',
+            allowInsecureKeySizes: false,
+            allowInvalidAsymmetricKeyTypes: false,
+            ...options,
+        };
 
+        if (payload.jti) {
+            delete signOptions.jwtid;
+        }
+
+        if (payload.nbf) {
+            delete signOptions.notBefore;
+        }
+
+        if (payload.exp) {
+            delete signOptions.expiresIn;
+        }
+
+        return new Promise((resolve, reject) =>
             jwt.sign(payload, keyPair.privateKey, signOptions, (err, token) => {
                 if (err) {
                     reject(err);
@@ -128,7 +123,7 @@ export class JWTAuthHandler {
                     return;
                 }
                 resolve(token);
-            });
-        });
+            })
+        );
     }
 }
