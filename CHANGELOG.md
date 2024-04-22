@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.1.2...v2.1.3) (2024-04-22)
+
+
+### Bug Fixes
+
+* prevent dangling rejections in JWTAuthHandler ([#5](https://github.com/kapetacom/sdk-nodejs-auth-jwt/issues/5)) ([d2f117b](https://github.com/kapetacom/sdk-nodejs-auth-jwt/commit/d2f117b175e6eea036762dccee1237645ab1c30e))
+
 ## [2.1.2](https://github.com/kapetacom/sdk-nodejs-auth-jwt/compare/v2.1.1...v2.1.2) (2024-03-13)
 
 
